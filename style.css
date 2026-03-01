@@ -34,3 +34,19 @@ button {
 button:hover {
     background: #005a9e;
 }
+footer {
+    background: #1e1e1e;
+    color: #888;
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    border-top: 1px solid #333;
+    font-style: italic;
+}
+
+.baby-name {
+    color: #ffb7c5; /* پیارا سا پنک/بیبی کلر */
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 183, 197, 0.5);
+    font-family: 'Comic Sans MS', cursive, sans-serif; /* تھوڑا نٹ کھٹ اسٹائل */
+}
