@@ -3,27 +3,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevAssist - Offline Editor</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/editor/editor.main.min.css">
+    <title>DevAssist+</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+        }
+        .toolbar {
+            background: #fff;
+            padding: 8px 16px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn:hover { background: #e4e4e4; }
+        .status {
+            margin-left: auto;
+            font-size: 13px;
+            color: #666;
+        }
+        .main {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            padding: 16px;
+            gap: 16px;
+        }
+        .editor-pane, .preview-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .pane-header {
+            background: #fafafa;
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .pane-header label {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        textarea {
+            width: 100%;
+            flex: 1;
+            border: none;
+            padding: 16px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+        .footer {
+            padding: 8px 16px;
+            border-top: 1px solid #ddd;
+            background: #fff;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+    <!-- Use marked from CDN for robust markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-
-<header>
-    <div class="logo">DevAssist 🐙</div>
-    <div class="controls">
-        <button id="runBtn">Run Code ✅</button>
-        <button id="saveBtn">Save 💾</button>
+    <div class="toolbar">
+        <button class="btn" onclick="saveToDisk('html')">💾 Save HTML</button>
+        <button class="btn" onclick="saveToDisk('md')">📄 Save MD</button>
+        <button class="btn" onclick="openFile()">📂 Open File</button>
+        <button class="btn" onclick="clearEditor()">🗑️ Clear</button>
+        <button class="btn" onclick="copyContent()">📋 Copy</button>
+        <span class="status" id="status">Ready</span>
     </div>
-</header>
+    <div class="main">
+        <div class="editor-pane">
+            <div class="pane-header">
+                Editor
+                <label>
+                    <input type="checkbox" id="forceMarkdown"> Force Markdown
+                </label>
+            </div>
+            <textarea id="codeEditor" placeholder="Type markdown or HTML..."></textarea>
+        </div>
+        <div class="preview-pane">
+            <div class="pane-header">Preview</div>
+            <iframe id="livePreview" sandbox="allow-same-origin allow-popups allow-forms"></iframe>
+        </div>
+    </div>
+    <div class="footer" id="footer">⏺️ Auto-saved locally</div>
 
-<div id="editor-container"></div>
+    <script>
+        (function() {
+            const editor = document.getElementById('codeEditor');
+            const previewFrame = document.getElementById('livePreview');
+            const statusEl = document.getElementById('status');
+            const footerEl = document.getElementById('footer');
+            const forceMarkdownCheckbox = document.getElementById('forceMarkdown');
 
-<footer>
-    Made with ❤️ for <span class="baby-name">Aman Ali</span> 🍼✨
-</footer>
+            let previewTimeout;
+            const STORAGE_KEY = 'devassist_persist_data';
+            const SCROLL_KEY = 'devassist_scroll';
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
-<script src="script.js"></script>
+            // --- Initial load ---
+            window.addEventListener('DOMContentLoaded', () => {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    editor.value = saved;
+                } else {
+                    editor.value = `# Welcome to DevAssist+ 🚀
+
+This enhanced version supports full markdown via **marked**.
+
+## Features
+- Live preview with debounce
+- Robust HTML detection (or force markdown)
+- File open (Markdown/HTML)
+- Copy to clipboard
+- Auto-resize & scroll persistence
+
+Try typing \`code\` or a [link](https://example.com).`;
+                }
+                // Restore scroll position
+                const savedScroll = localStorage.getItem(SCROLL_KEY);
+                if (savedScroll) editor.scrollTop = parseInt(savedScroll, 10);
+                updatePreview();
+                autoResize();
+            });
+
+            // --- Auto-save on input ---
+            editor.addEventListener('input', () => {
+                persistData();
+                updatePreviewDebounced();
+                autoResize();
+            });
+
+            // Save scroll position on scroll
+            editor.addEventListener('scroll', () => {
+                localStorage.setItem(SCROLL_KEY, editor.scrollTop);
+            });
+
+            // Force markdown toggle
+            forceMarkdownCheckbox.addEventListener('change', updatePreview);
+
+            // --- Preview update (debounced) ---
+            function updatePreviewDebounced() {
+                clearTimeout(previewTimeout);
+                previewTimeout = setTimeout(updatePreview, 250);
+            }
+
+            function updatePreview() {
+                const raw = editor.value;
+                const forceMarkdown = forceMarkdownCheckbox.checked;
+
+                // Determine if content is HTML (unless forced to markdown)
+                let isHtml = !forceMarkdown && looksLikeHtml(raw);
+
+                const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+                previewDoc.open();
+
+                if (isHtml) {
+                    // Direct HTML injection
+                    previewDoc.write(raw);
+                } else {
+                    // Render markdown with marked
+                    const rendered = marked.parse(raw, { 
+                        breaks: true, 
+                        gfm: true,
+                        sanitize: false // marked doesn't sanitize by default, but content is local
+                    });
+                    previewDoc.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset="utf-8">
+                            <style>
+                                body {
+                                    font-family: 'Segoe UI', sans-serif;
+                                    max-width: 800px;
+                                    margin: 40px auto;
+                                    padding: 20px;
+                                    line-height: 1.6;
+                                    color: #333;
+                                }
+                                pre { background: #f4f4f4; padding: 1em; border-radius: 5px; overflow-x: auto; }
+                                code { background: #f0f0f0; padding: 0.2em 0.4em; border-radius: 3px; }
+                                table { border-collapse: collapse; width: 100%; }
+                                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                                blockquote { border-left: 4px solid #ccc; margin: 0; padding-left: 1em; color: #666; }
+                            </style>
+                        </head>
+                        <body>${rendered}</body>
+                        </html>
+                    `);
+                }
+                previewDoc.close();
+
+                // Update status
+                const lines = raw.split('\n').length;
+                const words = raw.trim() ? raw.trim().split(/\s+/).length : 0;
+                statusEl.textContent = `📝 ${lines} lines · ${words} words`;
+                footerEl.textContent = `⏺️ Auto-saved ${new Date().toLocaleTimeString()}`;
+            }
+
+            // --- Simple HTML detection (look for typical HTML tags) ---
+            function looksLikeHtml(content) {
+                const trimmed = content.trim();
+                // Quick checks: doctype, html, head, body, or common tags at start
+                return /^\s*<!DOCTYPE html/i.test(trimmed) ||
+                       /^\s*<html/i.test(trimmed) ||
+                       /^\s*<head/i.test(trimmed) ||
+                       /^\s*<body/i.test(trimmed) ||
+                       /^\s*<(div|p|h[1-6]|span|a|img|table|ul|ol|li|script|style)/i.test(trimmed);
+            }
+
+            // --- Persistence ---
+            function persistData() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, editor.value);
+                } catch (e) {
+                    statusEl.textContent = '⚠️ Storage full, cannot save';
+                }
+            }
+
+            // --- Auto-resize editor ---
+            function autoResize() {
+                editor.style.height = 'auto';
+                editor.style.height = (editor.scrollHeight) + 'px';
+            }
+
+            // --- Export functions ---
+            window.saveToDisk = function(type) {
+                const content = editor.value;
+                const mime = type === 'html' ? 'text/html' : 'text/markdown';
+                const ext = type === 'html' ? 'html' : 'md';
+                const blob = new Blob([content], { type: mime });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `DevAssist.${ext}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                statusEl.textContent = `✅ Exported as DevAssist.${ext}`;
+            };
+
+            // --- Open file ---
+            window.openFile = function() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.md,.markdown,.html,.htm,text/markdown,text/html';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        editor.value = e.target.result;
+                        autoResize();
+                        persistData();
+                        updatePreview();
+                        statusEl.textContent = `📂 Loaded ${file.name}`;
+                    };
+                    reader.readAsText(file);
+                };
+                input.click();
+            };
+
+            // --- Clear editor ---
+            window.clearEditor = function() {
+                if (confirm('Clear all content?')) {
+                    editor.value = '';
+                    autoResize();
+                    persistData();
+                    updatePreview();
+                    statusEl.textContent = '🗑️ Cleared';
+                }
+            };
+
+            // --- Copy to clipboard ---
+            window.copyContent = function() {
+                navigator.clipboard.writeText(editor.value).then(() => {
+                    statusEl.textContent = '📋 Copied to clipboard';
+                }).catch(() => {
+                    statusEl.textContent = '❌ Copy failed';
+                });
+            };
+
+            // Initial auto-resize
+            autoResize();
+        })();
+    </script>
 </body>
 </html>
