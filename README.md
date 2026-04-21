@@ -1,38 +1,111 @@
-# 🐙 DevAssist - Offline Coding Editor
+# 🚀 Elite Enterprise Editor
 
-**DevAssist** ایک ہلکا پھلکا اور طاقتور آف لائن کوڈ ایڈیٹر ہے جسے خاص طور پر ڈویلپرز کی مدد کے لیے ڈیزائن کیا گیا ہے۔ یہ گوگل اے آئی اسٹوڈیو (Google AI Studio) کی مدد سے تیار کیا گیا ہے تاکہ آپ انٹرنیٹ کے بغیر بھی کوڈنگ اور ٹیسٹنگ کر سکیں۔
+## Professional Code Editor - Offline & Powerful
 
-## ✨ خصوصیات (Features)
+---
 
-- 💻 **Monaco Editor Support:** بالکل VS Code جیسا تجربہ۔
-- 🚀 **Instant Execution:** اپنے JavaScript کوڈ کو فوری طور پر رن (Run) کریں۔
-- 💾 **File Saving:** اپنے لکھے ہوئے کوڈ کو ایک کلک سے ڈاؤن لوڈ اور محفوظ کریں۔
-- 🎨 **Dark Theme:** آنکھوں کے لیے آرام دہ ڈارک موڈ انٹرفیس۔
-- 🌐 **Fully Responsive:** موبائل اور ڈیسک ٹاپ دونوں پر بہترین کام کرتا ہے۔
+## ✨ Features
 
-## 📂 فائل اسٹرکچر (File Structure)
+| Feature | Description |
+|---------|-------------|
+| Ace Editor | 100+ languages syntax highlighting |
+| Multiple Themes | Monokai, GitHub, Twilight, Tomorrow Night, Dracula |
+| Profile Management | Name, email, avatar with local storage |
+| Real-time Stats | Lines, characters, words, file size, cursor position |
+| Console Output | Capture console.log, error, warn |
+| File Operations | New, Open, Save, Download, Auto Save |
+| Keyboard Shortcuts | Ctrl+Z, Ctrl+Y, Ctrl+F, Ctrl+H, Ctrl+S |
+| Settings Panel | Theme, font size, tab size, key bindings |
 
-پروجیکٹ کو منظم رکھنے کے لیے درج ذیل ترتیب استعمال کی گئی ہے:
+---
 
-- `index.html`: ویب سائٹ کا بنیادی ڈھانچہ۔
-- `style.css`: تمام ڈیزائن اور اسٹائلنگ۔
-- `script.js`: ایڈیٹر اور بٹنز کی لاجک۔
-- `README.md`: پروجیکٹ کی معلومات (یہ فائل)۔
-
-## 🚀 کیسے استعمال کریں؟ (How to Use)
-
-1. اس ریپوزٹری کو ڈاؤن لوڈ یا کلون کریں۔
-2. `index.html` فائل پر ڈبل کلک کر کے اسے کسی بھی براؤزر (Chrome, Edge, Firefox) میں کھولیں۔
-3. اپنا کوڈ لکھیں اور **Run Code ✅** بٹن پر کلک کریں۔
-
-## 🛠️ ٹیکنالوجیز (Technologies Used)
+## 🛠️ Tech Stack
 
 - HTML5
 - CSS3
 - JavaScript (ES6+)
-- Monaco Editor API
+- Ace Editor
+- Font Awesome
+- Google Fonts (Inter)
 
 ---
 
-### 👨‍💻 تیار کردہ (Developed By)
-**Aman Ali** اگر آپ کو یہ پروجیکٹ پسند آیا ہو تو گٹ ہب پر ⭐ دینا نہ بھولیں!
+## 🚀 Quick Start
+
+```bash
+# Download or clone
+git clone https://github.com/yourusername/elite-editor.git
+
+# Open in browser
+open index.html
+```
+
+Or simply double-click `index.html` in any modern browser.
+
+---
+
+## 📁 Project Structure
+
+```
+elite-editor/
+├── index.html      # Complete application
+└── README.md       # Documentation
+```
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| Ctrl+Z | Undo |
+| Ctrl+Y | Redo |
+| Ctrl+F | Find |
+| Ctrl+H | Replace |
+| Ctrl+S | Save |
+
+---
+
+## 🌐 Browser Support
+
+- Chrome ✓
+- Firefox ✓
+- Edge ✓
+- Safari ✓
+- Opera ✓
+
+---
+
+## 📝 How to Use
+
+1. **Edit Profile** - Click profile icon → Edit Profile → Save
+2. **Write Code** - Type in editor panel
+3. **Run Code** - Click Run button → Output in Console tab
+4. **Open File** - Click Open → Select file
+5. **Save** - Auto saves every 10 seconds or click Save
+6. **Download** - Click Download button
+
+---
+
+## 👨‍💻 Developer
+
+**Aman Ali**
+
+[![GitHub](https://img.shields.io/badge/GitHub-black?style=flat-square&logo=github)](https://github.com/)
+[![Email](https://img.shields.io/badge/Email-red?style=flat-square&logo=gmail)](mailto:support@eliteeditor.com)
+
+---
+
+## 📄 License
+
+MIT License - Free for personal and commercial use
+
+---
+
+## ⭐ Support
+
+Star this repository if you like it!
+
+---
+
+**Code with Confidence** 🎯
